@@ -11,6 +11,11 @@ router.post('/register/student', async (req, res) => {
     try {
         const { studentId, name, email, password, address, studyYear } = req.body;
 
+        // check password length before hashing
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+
         // check if student exists
         const existingStudent = await Student.findOne({
             $or: [{ email }, { studentId }]
@@ -44,6 +49,11 @@ router.post('/register/student', async (req, res) => {
 router.post('/register/staff', async (req, res) => {
     try { 
         const { staffId, name, email, password, address } = req.body;
+
+        // check password length before hashing
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
 
         // check if staff exists
         const existingStaff = await Staff.findOne({
