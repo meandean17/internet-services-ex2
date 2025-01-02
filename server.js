@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import connectDB from './config/database.js';
+import connectDB from './src/config/database.js';
+import authRoutes from './src/routes/auth.js';
 
 // load env variables
 dotenv.config();
@@ -14,6 +15,9 @@ connectDB();
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// routes
+app.use('/api/auth', authRoutes);
 
 // test route
 app.get('/', (req, res) => {
