@@ -1,6 +1,7 @@
 import express from 'express';
-import { authenticateToken, authorizeStaff } from '../middleware/auth.js';
+import { authenticateToken, authorizeStaff, authorizeStudent } from '../middleware/auth.js';
 import Course from '../models/Course.js';
+import Student from '../models/Student.js';
 
 const router = express.Router();
 
@@ -131,5 +132,113 @@ router.get('/:courseId/status', authenticateToken, authorizeStaff, async (req, r
         res.status(500).json({ message: 'Error fetching course status' });
     }
 });
+
+//*** student routes ***//
+// get avail courses - student only
+router.get('/available', authenticateToken, authorizeStudent, async (req, res) => {
+    try {
+        const courses = await Course.find({
+            enrollmentCount: { $lt: '$maxStudents' } // only show courses not maxed out
+        });
+
+        if (!courses) {
+            return res.status(404).json({ message: 'No available courses' });
+        }
+        res.json(courses);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching available courses' });
+    }
+});
+
+// course registration - student only
+router.post('/:courseId/register', authenticateToken, authorizeStudent, async (req, res) => {
+    try {
+        const course = await Course.findOne({ courseId: req.params.courseId });
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        // check if course is full
+        if (course.enrollmentCount >= course.maxStudents) {
+            return res.status(400).json({ message: 'Course is full' });
+        }
+
+        // get students total credits
+        const student = await Student.findById(req.user.id).populate('courses');
+        const currentCredits = student.totalCredits || 0;
+
+        // check if we exceed max credits
+        if (currentCredits + course.credits > 20) {
+            return res.status(400).json({ message: 'Cannot register: Would exceed maximum of 20 credits. Please drop another course.' });
+        }
+
+        // check if already registered
+        if (course.enrolledStudents.includes(req.user.id)) {
+            return res.status(400).json({ message: 'Already registered for this course' });
+        }
+
+        // add student to course
+        course.enrolledStudents.push(req.user.id);
+        course.enrollmentCount += 1;
+        await course.save();
+
+        // update students credits
+        student.totalCredits += course.credits;
+        await student.save();
+
+        res.json({ message: 'Successfully registered for course: ', courseId: req.params.courseId });
+    } catch (error) {
+        res.status(500).json({ message: 'Error registering for course' });
+    }
+});
+
+// drop a course - student only
+router.delete('/:courseId/register', authenticateToken, authorizeStudent, async (req, res) => {
+    try {
+        const course = await Course.findOne({ courseId: req.params.courseId });
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        // check if registered
+        if (!course.enrolledStudents.includes(req.user.id)) {
+            return res.status(400).json({ message: 'Not registered for this course' });
+        }
+
+        // remove student
+        course.enrolledStudents = course.enrolledStudents.filter(
+            studentId => studentId.toString() !== req.user.id
+        );
+        course.enrollmentCount -= 1;
+        await course.save();
+
+        // update students credits
+        const student = await Student.findById(req.user.id);
+        student.totalCredits -= course.credits;
+        await student.save();
+
+        res.json({ message: 'Successfully dropped course: ', courseId: req.params.courseId });
+    } catch (error) {
+        res.status(500).json({ message: 'Error dropping course' });
+    }
+});
+
+// get student courses - student only
+router.get('/my-courses', authenticateToken, authorizeStudent, async (req, res) => {
+    try {
+        const courses = await Course.find({
+            enrolledStudents: req.user.id 
+        });
+        if (!courses) {
+            return res.status(404).json({ message: 'No courses found' });
+        }
+        res.json(courses);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching courses' });
+    }
+});
+
 
 export default router;
