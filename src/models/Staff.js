@@ -36,5 +36,8 @@ const staffSchema = new mongoose.Schema({
     }
 });
 
+staffSchema.index({ email: 1 });
+staffSchema.index({ staffId: 1 });
+
 const Staff = mongoose.model('Staff', staffSchema);
 export default Staff;

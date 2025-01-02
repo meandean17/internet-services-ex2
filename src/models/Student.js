@@ -46,5 +46,8 @@ const studentSchema = new mongoose.Schema({
     }
 });
 
+studentSchema.index({ email: 1 });
+studentSchema.index({ studentId: 1 });
+
 const Student = mongoose.model('Student', studentSchema);
 export default Student;
