@@ -175,10 +175,10 @@ router.get(
   async (req, res) => {
     try {
       const courses = await Course.find({
-        enrollmentCount: { $lt: "$maxStudents" }, // only show courses not maxed out
+        $expr: { $lt: ["$enrollmentCount", "$maxStudents"] },
       });
 
-      if (!courses) {
+      if (courses.length === 0) {
         return res.status(404).json({ message: "No available courses" });
       }
       res.json(courses);
@@ -234,7 +234,7 @@ router.post(
       await course.save();
 
       res.json({
-        message: "Successfully registered for course: ",
+        message: "Successfully registered for course",
         courseId: req.params.courseId,
         currentCredits: student.totalCredits,
       });
@@ -279,7 +279,7 @@ router.delete(
       await course.save();
 
       res.json({
-        message: "Successfully dropped course: ",
+        message: "Successfully dropped course",
         courseId: req.params.courseId,
         currentCredits: student.totalCredits,
       });
