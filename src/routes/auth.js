@@ -56,6 +56,7 @@ router.post("/register/student", async (req, res) => {
     await student.save();
     res.status(201).json({ message: "Student registered successfully" });
   } catch (error) {
+    console.error('Error registering student', error);
     res.status(500).json({ message: "Error registering student" });
   }
 });
@@ -104,6 +105,7 @@ router.post("/register/staff", async (req, res) => {
     await staff.save();
     res.status(201).json({ message: "Staff registered successfully" });
   } catch (error) {
+    console.error('Error registering staff', error);
     res.status(500).json({ message: "Error registering staff" });
   }
 });
@@ -142,6 +144,7 @@ router.post("/login", async (req, res) => {
 
     res.json({ token });
   } catch (error) {
+    console.error('Error logging in', error);
     res.status(500).json({ message: "Error logging in" });
   }
 });
