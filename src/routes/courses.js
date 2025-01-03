@@ -20,6 +20,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+// create course - staff only
 router.post("/", authenticateToken, authorizeStaff, async (req, res) => {
   try {
     const { courseId, name, lecturer, credits, maxStudents } = req.body;
