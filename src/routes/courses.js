@@ -20,6 +20,7 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+// create course - staff only
 router.post("/", authenticateToken, authorizeStaff, async (req, res) => {
   try {
     const { courseId, name, lecturer, credits, maxStudents } = req.body;
@@ -56,6 +57,7 @@ router.post("/", authenticateToken, authorizeStaff, async (req, res) => {
     await course.save();
     res.status(201).json({ message: "Course created successfully", course });
   } catch (error) {
+    console.log("Error creating course", error);
     res.status(500).json({ message: "Error creating course" });
   }
 });
@@ -105,6 +107,7 @@ router.put(
       await course.save();
       res.json({ message: "Course updated successfully", course });
     } catch (error) {
+      console.log("Error updating course", error);
       res.status(500).json({ message: "Error updating course" });
     }
   }
@@ -133,6 +136,7 @@ router.delete(
       await course.deleteOne({ _id: course._id });
       res.json({ message: "Course deleted successfully" });
     } catch (error) {
+      console.log("Error deleting course", error);
       res.status(500).json({ message: "Error deleting course" });
     }
   }
@@ -161,6 +165,7 @@ router.get(
         enrolledStudents: course.enrolledStudents,
       });
     } catch (error) {
+      console.log("Error fetching course status", error);
       res.status(500).json({ message: "Error fetching course status" });
     }
   }
@@ -183,6 +188,7 @@ router.get(
       }
       res.json(courses);
     } catch (error) {
+      console.log("Error fetching available courses", error);
       res.status(500).json({ message: "Error fetching available courses" });
     }
   }
@@ -239,6 +245,7 @@ router.post(
         currentCredits: student.totalCredits,
       });
     } catch (error) {
+      console.log("Error registering for course", error);
       res.status(500).json({ message: "Error registering for course" });
     }
   }
@@ -284,6 +291,7 @@ router.delete(
         currentCredits: student.totalCredits,
       });
     } catch (error) {
+      console.log("Error dropping course", error);
       res.status(500).json({ message: "Error dropping course" });
     }
   }
@@ -305,6 +313,7 @@ router.get(
         totalCredits: student.totalCredits,
       });
     } catch (error) {
+      console.log("Error fetching student courses", error);
       res.status(500).json({ message: "Error fetching courses" });
     }
   }

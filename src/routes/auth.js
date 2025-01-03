@@ -12,6 +12,18 @@ router.post("/register/student", async (req, res) => {
   try {
     const { studentId, name, email, password, address, studyYear } = req.body;
 
+    if (!studentId || !name || !email || !password || !address || !studyYear) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    if (studyYear < 1) {
+      return res.status(400).json({ message: "Study year must be at least 1" });
+    }
+
     // check password length before hashing
     if (password.length < 6) {
       return res
@@ -44,6 +56,7 @@ router.post("/register/student", async (req, res) => {
     await student.save();
     res.status(201).json({ message: "Student registered successfully" });
   } catch (error) {
+    console.error('Error registering student', error);
     res.status(500).json({ message: "Error registering student" });
   }
 });
@@ -52,6 +65,14 @@ router.post("/register/student", async (req, res) => {
 router.post("/register/staff", async (req, res) => {
   try {
     const { staffId, name, email, password, address } = req.body;
+
+    if (!staffId || !name || !email || !password || !address) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
 
     // check password length before hashing
     if (password.length < 6) {
@@ -84,6 +105,7 @@ router.post("/register/staff", async (req, res) => {
     await staff.save();
     res.status(201).json({ message: "Staff registered successfully" });
   } catch (error) {
+    console.error('Error registering staff', error);
     res.status(500).json({ message: "Error registering staff" });
   }
 });
@@ -122,6 +144,7 @@ router.post("/login", async (req, res) => {
 
     res.json({ token });
   } catch (error) {
+    console.error('Error logging in', error);
     res.status(500).json({ message: "Error logging in" });
   }
 });
