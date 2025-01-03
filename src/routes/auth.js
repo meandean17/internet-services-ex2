@@ -12,6 +12,18 @@ router.post("/register/student", async (req, res) => {
   try {
     const { studentId, name, email, password, address, studyYear } = req.body;
 
+    if (!studentId || !name || !email || !password || !address || !studyYear) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    if (studyYear < 1) {
+      return res.status(400).json({ message: "Study year must be at least 1" });
+    }
+
     // check password length before hashing
     if (password.length < 6) {
       return res
