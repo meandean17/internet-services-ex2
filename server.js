@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './src/config/database.js';
 import authRoutes from './src/routes/auth.js';
+import courseRoutes from './src/routes/courses.js';
 
 // load env variables
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', courseRoutes);
 
 // test route
 app.get('/', (req, res) => {

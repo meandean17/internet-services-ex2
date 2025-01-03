@@ -35,6 +35,10 @@ const studentSchema = new mongoose.Schema({
         required: true,
         min: 1
     },
+    enrolledCourses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+    }],
     totalCredits: {
         type: Number,
         default: 0,
@@ -45,6 +49,26 @@ const studentSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+// helper methods
+studentSchema.methods.canRegisterForCourse = function (courseCredits) {
+    return (this.totalCredits + courseCredits) <= 20;
+};
+
+studentSchema.methods.addCourse = function(course) {
+    if (!this.enrolledCourses.includes(course._id)) {
+        this.enrolledCourses.push(course._id);
+        this.totalCredits += course.credits;
+    }
+};
+
+studentSchema.methods.dropCourse = function(course) {
+    const courseIndex = this.enrolledCourses.indexOf(course._id);
+    if (courseIndex > -1) {
+        this.enrolledCourses.splice(courseIndex, 1);
+        this.totalCredits -= course.credits;
+    }
+};
 
 const Student = mongoose.model('Student', studentSchema);
 export default Student;
