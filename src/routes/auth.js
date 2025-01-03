@@ -53,6 +53,14 @@ router.post("/register/staff", async (req, res) => {
   try {
     const { staffId, name, email, password, address } = req.body;
 
+    if (!staffId || !name || !email || !password || !address) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
     // check password length before hashing
     if (password.length < 6) {
       return res
